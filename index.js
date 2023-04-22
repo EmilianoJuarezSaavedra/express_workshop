@@ -1,49 +1,72 @@
+const bodyParser = require('body-parser');
+const morgan = require('morgan');
 const express = require('express');
 const app = express();
-const { pokemon } = require('./pokedex.json');
+const pokemon = require('./routes/pokemon');
+
+app.use(morgan('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res, next) => {
-    res.status(200);
-    res.send("Bienvenido al pokedex");
+    return res.status(200).send("Bienvenido al pokedex");
+    // Tambien se puede hacer res.status(200).send("Bienvenido al Pokedex");
 });
 
-app.get("/pokemon/all", (req, res, next) => {
-    
-    res.status(200);
-    res.send(pokemon);
+app.use("/pokemon", pokemon);
+
+
+/*
+app.post("/pokemon", (req, res, next) => {
+    return res.status(200).send(req.body);
+});
+
+app.get("/pokemon", (req, res, next) => {
+    return res.status(200).send(pokemon);
 
     //res.send("Hola: " + req.params.name);
     //console.log("Hola: " + req.params.name);
 });
 
-app.get('/pokemon/:id([0-9]{1,4})', (req, res, next) => {
+app.get('/pokemon/:id([0-9]{1,3})', (req, res, next) => {
     
     const id = req.params.id -1;
     if(id >= 0 && id < pokemon.length) {
-        res.status(200);
-    res.send(pokemon[req.params.id -1]);
+        return res.status(200).send(pokemon[req.params.id -1]);
     }
-    else {
-        res.status(404);
-        res.send("Pokémon no encontrado")
-    }
+    return res.status(404).send("pokemon No encontrado");
 });
 
-app.get('/pokemon/:name', (req, res, next) => {
-    
+app.get('/pokemon/:name([A-Za-z]+)', (req, res, next) => {
     const name = req.params.name;
+    
+    const pk = pokemon.filter((p) => {
+        // el return es para que regrese todo lo que esta adentro
+        // de otra forma:  return (p.name.toUpperCase() == name.toUpperCase()) && p;
+        return (p.name.toUpperCase() == name.toUpperCase()) ? p : null;   //operador ternario es igual a un if
+    });
+    // pk es un arreglo entonces tiene longitud, por eso se puede hacer esta comparación
+     (pk.length > 0) ? res.status(200).send(pk) : res.status(200).send("Pokemon NO encontrado");  
+});  
+    /*se puede hacer tambien de esta forma que es mas explicada, pero con cosas mas complicadas no es mejor utilizarlo
     for(i = 0; i < pokemon.length; i++) {
-        if(name == pokemon[i].name) {
+        if (pokemon[i].name.toUpperCase() == name.toUpperCase()) {
             
-            res.status(200);
-            res.send("Tu pokemon es: " + pokemon[i]);
+            return res.status(200).send("Tu pokemon es: " + pokemon[i]);
 
         }
     }
-    res.status(404);
-    res.send("Pokemon llamado " + name +" NO existe");
-})
+    return res.status(404).send("Pokemon llamado " + name +" NO existe");*/
 
 app.listen(process.env.PORT || 3000, () => {
     console.log("Server is running...");
 });
+
+
+/*  --NOTAS--
+GET    - Obtener recursos 
+POST   - Almacenar/crear recursos
+PATCH  - Modificar una parte de un recurso
+PUT    - Modificar un recurso
+DELETE - Borrar un recurso
+*/

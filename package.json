@@ -25,6 +25,8 @@
   "homepage": "https://github.com/EmilianoJuarezSaavedra/express_workshop-2023-03#readme",
   "dependencies": {
     "express": "^4.18.2",
+    "morgan": "^1.10.0",
+    "mysql": "^2.18.1",
     "nodemon": "^2.0.22"
   }
 }
