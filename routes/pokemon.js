@@ -2,32 +2,49 @@ const express = require('express');
 const pokemon = express.Router();
 const db = require('../config/database');
 
-pokemon.post("/", (req, res, next) => {
-    return res.status(200).send(req.body); 
+pokemon.post("/", async (req, res, next) => {
+
+    const { pok_name, pok_height, pok_weight, pok_base_experience } = req.body;
+    
+    if (pok_name && pok_height && pok_weight && pok_base_experience) {
+        let query = "INSERT INTO pokemon(pok_name, pok_height, pok_weight, pok_base_experience)";
+        query += ` VALUES('${pok_name}', ${pok_height}, ${pok_weight}, ${pok_base_experience})`;
+    
+        const rows = await db.query(query);
+
+        if(rows.affectedRows == 1) {
+            return res.status(201).json({code: 201, message: "Pokemon insertado correctamente" });
+        }
+
+        return res.status(500).json({code: 500, message: "Ocurrio un error"});
+    }
+    return res.status(500).json({code: 500, message: "Campos incompletos"});
 });
 
 pokemon.get("/", async (req, res, next) => {
     const pkmn = await db.query("SELECT *  FROM pokemon");
      console.log(pkmn);
-    return res.status(200).json(pkmn);
+    return res.status(201).json({code: 201, message: pkmn});
 });
 
-pokemon.get('/:id([0-9]{1,3})', (req, res, next) => {
-    const id = req.params.id -1;
+pokemon.get('/:id([0-9]{1,5})', async (req, res, next) => {
+    const id = req.params.id;
 
-    if(id >= 0 && id < db.length) {
-        return res.status(200).send(db[req.params.id -1]);
+    if(id >= 1 && id <= 722) {
+        const pkmn = await db.query("SELECT * FROM pokemon WHERE pok_id= " + id + ";");
+        console.log(pkmn);
+        return res.status(201).json({ code: 201, message: pkmn });
+        
     }
-    return res.status(404).send("pokemon No encontrado");
+    return res.status(404).json({ code: 404, message: "El Pokemon No se ha encontrado con el id: " + id });
 });
 
-pokemon.get('/:name([A-Za-z]+)', (req, res, next) => {
+pokemon.get('/:name([A-Za-z]+)', async (req, res, next) => {
     const name = req.params.name;
     
-    const pkmn = db.filter((p) => {
-        return (p.name.toUpperCase() == name.toUpperCase()) ? p : null;   //operador ternario es igual a un if
-    });
-    (pkmn.length > 0) ? res.status(200).send(pkmn) : res.status(404).send("Pokemon NO encontrado");  
+    const pkmn = await db.query("SELECT * FROM pokemon WHERE pok_name= " + name + ";");
+     //operador ternario es igual a un if
+    return (pkmn.length > 0) ? res.status(200).json({code: 201, message: pkmn}) : res.status(404).json({code: 404, message: "Pokemon NO encontrado con el nombre: " + name});  
 });  
 
 module.exports = pokemon;
