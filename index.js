@@ -1,8 +1,14 @@
-
+//Dependencies
 const morgan = require('morgan');
 const express = require('express');
 const app = express();
+//Routes
 const pokemon = require('./routes/pokemon');
+const user = require('./routes/user');
+//Middleware
+const auth = require('./middleware/auth');
+const notFound = require('./middleware/notFound');
+const index = require('./middleware/index');
 
 app.use(morgan('dev'));
 app.use(express.json());
@@ -10,16 +16,12 @@ app.use(express.urlencoded({ extended: true}));
 
 // JavaScrip es secuencial se lee de arriba para abajo
 
-app.get("/", (req, res, next) => {
-    return res.status(200).json( {code: 1, message: "Bienvenido al pokedex"} );
-    // Tambien se puede hacer res.status(200).send("Bienvenido al Pokedex");
-});
+app.get("/", index);
 
+app.use("/user", user);
+app.use(auth);
 app.use("/pokemon", pokemon);
-
-app.use((req, res, next) => {
-    return res.status(404).json({code: 404, message: "URL no encontrado, Vuelve a ingresar la URL correcta"});
-});
+app.use(notFound);
 
 
 /*
