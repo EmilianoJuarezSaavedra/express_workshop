@@ -26,14 +26,19 @@ user.post("/login", async (req, res, next) => {
     const rows = await db.query(query);
 
     if(user_email && user_password) {
-        //jwt.sing recibe un json de los datos de abajo y con eso va a generar el token
-        const token = jwt.sign({
-            user_id: rows[0].user_id,
-            user_email: rows[0].user_email
-        }, "debugkey");
-        return (rows.length == 1) ? res.status(200).json({code: 200, message: token}) : res.status(401).json({code: 401, message: "Usarios y/o contraseña incorrectos"});
+        if(rows.length == 1){ 
+            //jwt.sing recibe un json de los datos de abajo y con eso va a generar el token
+            const token = jwt.sign({
+                user_id: rows[0].user_id,
+                user_email: rows[0].user_email
+            }, "debugkey", );
+            return res.status(200).json({code: 200, message: token}) 
+        } 
+        else {
+            return res.status(200).json({code: 401, message: "Usarios y/o contraseña incorrectos"});
+        }
     }
-    return res.status(500).json({code:500, message: "Campos incompletos"});
+    return res.status(200).json({ code:500, message: "Campos incompletos" });
 });
 
 user.get("/", async (req, res, next) => {

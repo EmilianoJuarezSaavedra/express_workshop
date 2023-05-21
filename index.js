@@ -8,15 +8,17 @@ const user = require('./routes/user');
 //Middleware
 const auth = require('./middleware/auth');
 const notFound = require('./middleware/notFound');
-const index = require('./middleware/index');
+const welcome = require('./middleware/welcome');
+const cors = require('./middleware/cors');
 
+app.use(cors);
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true}));
 
 // JavaScrip es secuencial se lee de arriba para abajo
 
-app.get("/", index);
+app.get("/", welcome);
 
 app.use("/user", user);
 app.use(auth);
